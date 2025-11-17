@@ -55,7 +55,7 @@ const SideBar = (props: Props) => {
         <nav className="z-10 w-full">
             <SideBarLink icon={Home} label="Home" href='/'/>
             <SideBarLink icon={Briefcase} label="Timeline" href='/timeline'/>
-            <SideBarLink icon={Search} label="Home" href='/search'/>
+            <SideBarLink icon={Search} label="Search" href='/search'/>
             <SideBarLink icon={Settings} label="Settings" href='/settings'/>
             <SideBarLink icon={User} label="Users" href='/users'/>
             <SideBarLink icon={Users} label="Teams" href='/teams'/>
