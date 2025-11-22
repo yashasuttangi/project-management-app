@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -20,7 +20,13 @@ model User {
   username          String  @unique
   profilePictureUrl String?
   teamId            Int?
-  team              Team?   @relation(fields: [teamId], references: [id])
+
+  authoredTasks   Task[]           @relation("TaskAuthor")
+  assignedTasks   Task[]           @relation("TaskAssignee")
+  taskAssignments TaskAssignment[]
+  attachments     Attachment[]
+  comments        Comment[]
+  team            Team?            @relation(fields: [teamId], references: [id])
 }
 
 model Team {
@@ -43,17 +49,61 @@ model Project {
 }
 
 model ProjectTeam {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   teamId    Int
   projectId Int
-  team      Team[]
-  project   Project[]
+  team      Team    @relation(fields: [teamId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
 }
 
 model Task {
-  id    Int    @id @default(autoincrement())
-  title String
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String?
+  status         String?
+  priority       String?
+  tags           String?
+  startDate      DateTime?
+  dueDate        DateTime?
+  points         Int?
+  projectId      Int
+  authorUserId   Int
+  assignedUserId Int?
 
-  project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?
+  project         Project          @relation(fields: [projectId], references: [id])
+  author          User             @relation("TaskAuthor", fields: [authorUserId], references: [userId])
+  assignee        User?            @relation("TaskAssignee", fields: [assignedUserId], references: [userId])
+  taskAssignments TaskAssignment[]
+  attachments     Attachment[]
+  comments        Comment[]
+}
+
+model TaskAssignment {
+  id     Int @id @default(autoincrement())
+  userId Int
+  taskId Int
+
+  user User @relation(fields: [userId], references: [userId])
+  task Task @relation(fields: [taskId], references: [id])
+}
+
+model Attachment {
+  id           Int     @id @default(autoincrement())
+  fileURL      String
+  fileName     String?
+  taskId       Int
+  uploadedById Int
+
+  task       Task @relation(fields: [taskId], references: [id])
+  uploadedBy User @relation(fields: [uploadedById], references: [userId])
+}
+
+model Comment {
+  id     Int    @id @default(autoincrement())
+  text   String
+  taskId Int
+  userId Int
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [userId])
 }
