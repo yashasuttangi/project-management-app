@@ -6,12 +6,15 @@ import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import Link from "next/link";
 import { setIsSidebarCollapsed } from "@/state";
+import { useGetProjectsQuery } from "@/state/api";
 
 type Props = {};
 
 const SideBar = (props: Props) => {
     const [showProjects, setShowProjects] = useState(true);
     const [showPriority, setShowPriority] = useState(true);
+
+    const { data: projects } = useGetProjectsQuery();
 
     const dispatch = useAppDispatch();
     const isSideBarCollapsed = useAppSelector((state) => state.global.isSidebarCollapsed);
@@ -71,6 +74,14 @@ const SideBar = (props: Props) => {
             ) : ( <ChevronDownCircle className="h-5 w-5" /> )}
         </button>
         { /* PROJECTS LIST */ }
+        { showProjects && projects?.map((project) => (
+            <SideBarLink
+                key={project.id}
+                icon={Briefcase}
+                label={project.name}
+                href={`/projects/${project.id}`}
+            />
+        ))}
 
         { /* PRIORITY LIST */ }
          <button
@@ -84,11 +95,11 @@ const SideBar = (props: Props) => {
         </button>
 
         { /* PRIORITY LIST ITEMS */ }
-        <SideBarLink icon={AlertCircle} label="Urgent" href='/priority/urgent'/>
-        <SideBarLink icon={ShieldAlert} label="High" href='/priority/high'/>
-        <SideBarLink icon={AlertTriangle} label="Medium" href='/priority/medium'/>
-        <SideBarLink icon={AlertOctagon} label="Low" href='/priority/low'/>
-        <SideBarLink icon={Layers3} label="Backlog" href='/priority/backlog'/>
+        <SideBarLink icon={AlertCircle} color="text-red-500" label="Urgent" href='/priority/urgent'/>
+        <SideBarLink icon={ShieldAlert} color="text-orange-500" label="High" href='/priority/high'/>
+        <SideBarLink icon={AlertTriangle} color="text-yellow-500" label="Medium" href='/priority/medium'/>
+        <SideBarLink icon={AlertOctagon} color="text-blue-500" label="Low" href='/priority/low'/>
+        <SideBarLink icon={Layers3} color="text-gray-500" label="Backlog" href='/priority/backlog'/>
 
     </div>
   </div>;
@@ -97,12 +108,14 @@ const SideBar = (props: Props) => {
 interface SideBarLinkProps {
     href: string;
     icon: LucideIcon;
+    color?:string;
     label: string;
 }
 
 const SideBarLink = ({ 
     href, 
     icon: Icon, 
+    color,
     label, 
 }: SideBarLinkProps) => {
     const pathname = usePathname();
@@ -118,7 +131,7 @@ const SideBarLink = ({
                 {isActive && (
                     <div className="absolute left-0 top-0 h-full w-[5px] bg-blue-200"/>
                 )}
-                <Icon className="h-6 w-6 text-gray-800 dark:text-gray-100" />
+                <Icon className={`h-6 w-6 text-gray-800 dark:text-gray-100 ${color ? color : "text-gray-500"}`} />
                 <span className="font-medium text-gray-800 dark:text-gray-100" >
                     {label}
                 </span>
